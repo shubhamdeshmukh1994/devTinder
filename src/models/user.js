@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
-var validator = require('validator');
+const validator = require('validator');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -32,16 +35,25 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         minlength: 6,
-        maxlength: 128
+        maxlength: 128,
+        validate(value) {
+            return validator.isStrongPassword(value, {
+                minLength: 6,
+                minLowercase: 1,
+                minUppercase: 1,
+                minNumbers: 1,
+                minSymbols: 1
+            });
+        }
     },
     age: {
         type: Number,
-        required: true,
+        required: false,
         min: 18,
     },
     gender: {
         type: String,
-        required: true,
+        required: false,
         validate(value) {
             const allowedGenders = ['male', 'female', 'other'];
             return allowedGenders.includes(value);
@@ -56,12 +68,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: false,
         default: "",
-        validate: {
-            validator: function(value) {
-                return validator.isURL(value);
-            },
-            message: 'Invalid URL for profile picture'
-        }
+        // validate: {
+        //     // validator: function(value) {
+        //     //     return validator.isURL(value);
+        //     // },
+        //     // message: 'Invalid URL for profile picture'
+        // }
     },
     about: {
         type: String,
@@ -83,6 +95,25 @@ const userSchema = new mongoose.Schema({
 },
 {timestamps: true}
 );
+
+userSchema.methods.getJwtToken = async function() {
+    const user = this;
+    const token = await jwt.sign(
+        { _id: this._id, emailId: this.emailId },           
+       "DEVTINDER_SECRET_KEY",
+        { expiresIn: '1d' }
+    );
+    return token;
+}
+
+userSchema.methods.validatePassword = async function(password) {
+    const user = this;
+    const passwordHash = user.password;
+    const isPasswordValid = await bcrypt.compare(password, passwordHash);
+    return isPasswordValid;
+
+}   
+
 
 const User = mongoose.model('User', userSchema);  
 
