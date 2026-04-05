@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+var validator = require('validator');
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -22,6 +23,9 @@ const userSchema = new mongoose.Schema({
         validate(value) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(value);
+        },
+        validator: function(value) {
+            return validator.isEmail(value);
         }
     },
     password: {
@@ -51,7 +55,13 @@ const userSchema = new mongoose.Schema({
     profilePicture: {
         type: String,
         required: false,
-        default: "https://www.clipartmax.com/middle/m2i8d3i8N4d3N4K9_flat-person-icon-download-dummy-man/"
+        default: "",
+        validate: {
+            validator: function(value) {
+                return validator.isURL(value);
+            },
+            message: 'Invalid URL for profile picture'
+        }
     },
     about: {
         type: String,

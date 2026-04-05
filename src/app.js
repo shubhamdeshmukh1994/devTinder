@@ -91,11 +91,28 @@ app.delete("/users/:id", async function(req,res){
 });
 
 app.patch("/users/:id", async function(req,res){
-	console.log("Request params", req.params,req.body, req);
 	let userId = req.params.id;
 	console.log("User id to delete", userId);
 	let body = req.body;
 	try { 
+
+		let allowed_update = [
+			"firstName", "lastName", "age", "gender", "profilePicture", "about", "interests", "skills", "education"];
+		let is_allowed_update = allowed_update && Object.keys(body).every((k)=>
+			allowed_update.includes(k)
+		)
+
+		if(!is_allowed_update) {
+			return res.status(400).send("Invalid update field");
+		}
+		if(body?.skills && body.skills.length > 10) {
+			return res.status(400).send("Maximum 10 skills allowed");
+		}	
+
+		if(body?.interests && body.interests.length > 10) {
+			return res.status(400).send("Maximum 10 interests allowed");
+		}	
+
 		let data = await User.findByIdAndUpdate(userId, body, 
 			{ 	new: true,
 				runValidators: true
