@@ -13,8 +13,8 @@ connectionRouter.use(errorHandler);
 connectionRouter.post("/connection/send-request/:status/:toUserId", userAuth, async function(req,res){
     try {   
         const status = req.params.status;
-        const toUserId =req.params.toUserId;
-        const fromUserId = req.user._id;
+        const toUserId =req.params.toUserId.toString();
+        const fromUserId = req.user._id.toString()
 
         const allowedStatus = ["ignored", "interested"];
         if(!allowedStatus.includes(status)) {
@@ -22,7 +22,7 @@ connectionRouter.post("/connection/send-request/:status/:toUserId", userAuth, as
                 message: "Invalid status value. Allowed values are 'ignored' and 'interested'."
             });
         }
-        if(toUserId === fromUserId){
+        if(toUserId === fromUserId) {
             return res.status(400).json({
                 message: "You cannot send a connection request to yourself."
             });
@@ -59,6 +59,47 @@ connectionRouter.post("/connection/send-request/:status/:toUserId", userAuth, as
     } catch (error) {
         console.log("Error sending connection request", error);
         res.status(500).send("Error sending connection request");
+    }
+});
+
+connectionRouter.post("/connection/review-request/:status/:requestId", userAuth, async function(req,res){
+    try {
+        const status = req.params.status;
+        const requestId = req.params.requestId;
+        const userId = req.user._id;
+    
+        const allowedStatus = ["accepted", "rejected"];
+        if(!allowedStatus.includes(status)) {
+            return res.status(400).json({
+                message: "Invalid status value. Allowed values are 'accepted' and 'rejected'."
+            }); 
+        }
+        const connectionRequest = await ConnectionRequest.findById(requestId);
+        if(!connectionRequest) {
+            return res.status(404).json({
+                message: "Connection request not found."
+            });
+        }
+        console.log("userId",userId.toString(),"fromUserId",connectionRequest.fromUserId.toString())
+        if(connectionRequest.fromUserId.toString() === userId.toString()) {
+            return res.status(403).json({
+                message: "You are not authorized to review this connection request."
+            });
+        }
+        if(connectionRequest.status !== "interested") {
+            return res.status(400).json({
+                message: `This connection request has already been ${connectionRequest.status}.`
+            });
+        }
+        connectionRequest.status = status;
+        const data =await connectionRequest.save();
+        res.send({
+            message: `Connection request ${status} successfully.`,
+            data
+        });
+    } catch (error) {
+        console.log("Error reviewing connection request", error);
+        res.status(500).send("Error reviewing connection request");
     }
 });
 

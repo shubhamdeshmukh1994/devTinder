@@ -24,21 +24,12 @@ connectionRequestSchema.index({ fromUserId: 1, toUserId: 1 }, { unique: true });
 
 connectionRequestSchema.pre('save', async function(next) {
     try {
-        const connectionRequest = this;
-        // const existingRequest = await ConnectionRequest.findOne({
-        //     $or:[
-        //         { fromUserId: this.fromUserId, toUserId: this.toUserId },
-        //         { fromUserId: this.toUserId, toUserId: this.fromUserId }
-        //     ]
-        // });
-        // if(existingRequest) {
-        //     throw new Error("A connection request already exists between these users.");
-        // }
+        const connectionRequest = this;xw
         if(connectionRequest.fromUserId.equals(connectionRequest.toUserId)) {
-            throw new Error("You cannot send a connection request to yourself.");
+            throw new Error("You cannot send a connection request to yourself.");xw
         }
     } catch (error) {
-        next(error);
+        console.error("Error in connection request pre-save hook:", error);
     }
 });
 
