@@ -11,11 +11,13 @@ app.use(express.json());
 
 const authRouter = require("./routers/auth");
 const profileRouter = require("./routers/profile");
-const requestRouter = require("./routers/request");
+const usersRouter = require("./routers/users");
+const connectionRouter = require("./routers/connection");
 
 app.use("/",authRouter);
 app.use("/",profileRouter);
-app.use("/",requestRouter);
+app.use("/",usersRouter);
+app.use("/",connectionRouter);
 
 
 connectDb().then(() => {

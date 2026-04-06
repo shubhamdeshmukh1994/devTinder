@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
     emailId: {
         type: String,
         required: true,
-        unique: true,
+        unique: true, // automatically creates an index in the database for this field
         minlength: 5,
         maxlength: 80,
         lowercase: true,
@@ -54,10 +54,10 @@ const userSchema = new mongoose.Schema({
     gender: {
         type: String,
         required: false,
-        validate(value) {
-            const allowedGenders = ['male', 'female', 'other'];
-            return allowedGenders.includes(value);
-        }
+        enum: {
+            values: ['male', 'female', 'other'],
+            message: `{VALUE} is not supported`
+        },
     },
     phone: {
         type: String,

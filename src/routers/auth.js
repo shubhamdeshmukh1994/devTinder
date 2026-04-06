@@ -87,4 +87,24 @@ authRouter.post("/users/logout", async function(req,res){
     }
 });
 
+authRouter.post("/users/reset-password", async function(req,res){
+    try {
+        const { emailId, newPassword } = req.body;
+        if(!validator.isEmail(emailId)) {
+            return res.status(400).send("Invalid email");
+        }
+        let user = await User.findOne({ emailId });
+        if(!user) {
+            return res.status(404).send("User not found");
+        }
+        const saltRounds = 10;
+        const hashedPassword = await bycrypt.hash(newPassword, saltRounds);
+        user.password = hashedPassword;
+        await user.save();
+        res.send("Password reset successful");
+    } catch (error) {
+        console.log("Error resetting password", error);
+        res.status(500).send("Error resetting password");     
+    }           
+});
 module.exports = authRouter;
