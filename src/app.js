@@ -2,11 +2,17 @@ let express = require("express");
 let app = express();
 let connectDb = require("./config/database");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 const port = process.env.PORT || 3000;
 
 //The ExpressJSon() middleware is applied to parse incoming JSON request bodies,
+app.use(cors({
+  origin: 'http://localhost:5175',
+  credentials: true
+}));
 app.use(cookieParser());
 app.use(express.json());
+
 
 
 const authRouter = require("./routers/auth");

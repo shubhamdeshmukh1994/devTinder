@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const User = require("../models/user");
 const { validateSingUpData } = require("../utils/validation");
 const { errorHandler } = require("../middleware/error");
+const { getUserAvatar } = require("../utils/helper");
 
 // app.use(); router.use() this both are same
 //The ExpressJSon() middleware is applied to parse incoming JSON request bodies, making the data accessible via req.body.
@@ -28,14 +29,24 @@ authRouter.post("/users/login", async function(req,res){
 		if(isPasswordMatch) {
 			const token = await user.getJwtToken();
 			//set and send cookie with token
+            console.log("res.cookie", res.cookie);
 			res.cookie("token", token, {
 				httpOnly: true,
 				expires: new Date(Date.now() + 24 * 3600000)
 			});
+            console.log("res.cookie", res.cookie);
 			res.send({
 				message: "Login successful",
-				token
-			});
+				token,
+				firstName: user?.firstName,
+				lastName: user?.lastName,
+				emailId: user?.emailId,
+				phone: user?.phone,
+				id: user._id,
+				profilePicture: user?.profilePicture || await getUserAvatar(user?.firstName, user?.lastName),
+				skills: user?.skills,
+				about: user?.about,
+			});	
 		} else {
 			res.status(401).send("Invalid credentials");
 		}
@@ -52,12 +63,16 @@ authRouter.post("/users/signup", async function(req,res){
 		const saltRounds = 10;
 		const hashedPassword = await bycrypt.hash(password, saltRounds);
 		console.log("Hashed password", hashedPassword);
+		if(!req.body.profilePicture) {
+			req.body.profilePicture = await getUserAvatar(req.body.firstName, req.body.lastName);
+		}
 		const user = new User({
 			firstName: req.body.firstName,
 			lastName: req.body.lastName,
 			emailId: req.body.emailId,
 			password: hashedPassword,
-			phone: req.body.phone
+			phone: req.body.phone,
+			profilePicture: req.body.profilePicture
 		});
 
 		let data = await user.save();
