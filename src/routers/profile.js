@@ -4,6 +4,7 @@ const { userAuth } = require("../middleware/auth");
 const User = require("../models/user");
 const { errorHandler } = require("../middleware/error");
 const { validateEditProfileData } = require("../utils/validation");
+const { getUserAvatar } = require("../utils/helper");
 
 profileRouter.use(express.json());
 profileRouter.use(errorHandler);
@@ -15,9 +16,12 @@ profileRouter.get("/profile/view", userAuth, async function(req,res){
 		if(!user) {
 			return res.status(404).send("User not found");
 		}
+		if(!user.profilePicture) {
+			user.profilePicture = await getUserAvatar(user.firstName, user.lastName);
+		}
 		res.send({user : user});	
 	} catch(err) {
-		console.log("Error logging in user", error);
+		console.log("Error logging in user", err);
 		res.status(500).send("Error logging in user");	
 	}
 });
