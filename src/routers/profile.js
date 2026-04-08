@@ -48,7 +48,7 @@ profileRouter.patch("/profile/edit", userAuth, async function(req,res){
             user: loggedInUser
         });	
 	} catch(err) {
-		console.log("Error logging in user", error);
+		console.log("Error logging in user", err);
 		res.status(500).send("Error logging in user");	
 	}
 });

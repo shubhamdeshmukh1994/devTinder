@@ -46,6 +46,8 @@ authRouter.post("/users/login", async function(req,res){
 				profilePicture: user?.profilePicture || await getUserAvatar(user?.firstName, user?.lastName),
 				skills: user?.skills,
 				about: user?.about,
+				age: user?.age,
+				gender:user?.gender
 			});	
 		} else {
 			res.status(401).send("Invalid credentials");
@@ -76,8 +78,15 @@ authRouter.post("/users/signup", async function(req,res){
 		});
 
 		let data = await user.save();
-		console.log("User created",data);
-		res.send("post request to users");
+		const token = await data.getJwtToken();
+		res.cookie("token", token, {
+			httpOnly: true,
+			expires: new Date(Date.now() + 24 * 3600000)
+		});
+		res.send({
+			"message": "User Signed Up successfully",
+			"data":data
+		});
 	} catch (error) {
 		console.log("Error validating user data", error);
 		return res.status(500).send("Error validating user data");

@@ -14,7 +14,6 @@ usersRouter.get("/users", userAuth, async function(req,res){
 	let searchQuery = {
 		firstName: req.body.firstName
 	};
-	console.log("Search query", searchQuery);
 	try {
 		let user = await User.find(searchQuery);
 		if(user.length === 0) {
@@ -108,7 +107,6 @@ usersRouter.get("/users/requests/:status", userAuth, async function(req,res){
 			toUserId: userId,
 			status: status
 		};
-		console.log("Search query", searchQuery);
 		const requests = await ConnectionRequest.find(
 			searchQuery
 		).populate("fromUserId", [
@@ -137,7 +135,6 @@ usersRouter.get("/users/connections", userAuth, async function(req,res){
 				{ toUserId: userId, status: "accepted" }
 			]
 		};
-		console.log("Search query", searchQuery);
 		const connections = await ConnectionRequest.find(
 			searchQuery
 		).populate("fromUserId toUserId", [
