@@ -1,3 +1,4 @@
+require('dotenv').config()
 let express = require("express");
 let app = express();
 let connectDb = require("./config/database");
@@ -12,8 +13,6 @@ app.use(cors({
 }));
 app.use(cookieParser());
 app.use(express.json());
-
-
 
 const authRouter = require("./routers/auth");
 const profileRouter = require("./routers/profile");
