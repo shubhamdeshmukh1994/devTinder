@@ -5,6 +5,7 @@ const validator = require("validator");
 const { userAuth } = require("../middleware/auth");
 const { errorHandler } = require("../middleware/error");
 const User = require("../models/user");
+const sendEmail = require("../utils/sendEmail.cjs");
 
 
 connectionRouter.use(express.json());
@@ -51,7 +52,20 @@ connectionRouter.post("/connection/send-request/:status/:toUserId", userAuth, as
             toUserId: toUserId,
             status: status
         });
+        
         const data = await conneqtionRequest.save();
+
+        const emailRes = await sendEmail.run(
+            "New Connection Request",
+            `<h2>Hello ${isValidToUserId?.firstName}👋</h2>
+            <p>You have received a connection request from <b>${req?.user?.firstName}</b>.</p>
+            <p><strong>Status:</strong> ${status}</p>
+            <p>Login to respond.</p>
+            <br/>
+            <p>Thanks,<br/>DevTinder Team</p>
+          `
+        )
+        console.log("emailRes",emailRes)
         res.send({
             message: "Connection request sent successfully",
             data
