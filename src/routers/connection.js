@@ -65,7 +65,6 @@ connectionRouter.post("/connection/send-request/:status/:toUserId", userAuth, as
             <p>Thanks,<br/>DevTinder Team</p>
           `
         )
-        console.log("emailRes",emailRes)
         res.send({
             message: "Connection request sent successfully",
             data
@@ -94,7 +93,6 @@ connectionRouter.post("/connection/review-request/:status/:requestId", userAuth,
                 message: "Connection request not found."
             });
         }
-        console.log("userId",userId.toString(),"fromUserId",connectionRequest.fromUserId.toString())
         if(connectionRequest.fromUserId.toString() === userId.toString()) {
             return res.status(403).json({
                 message: "You are not authorized to review this connection request."

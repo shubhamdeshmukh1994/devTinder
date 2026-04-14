@@ -24,17 +24,14 @@ authRouter.post("/users/login", async function(req,res){
 		if(!user) {
 			return res.status(404).send("User not found");
 		}
-		console.log("User found", user);
 		const isPasswordMatch = await user.validatePassword(password);
 		if(isPasswordMatch) {
 			const token = await user.getJwtToken();
 			//set and send cookie with token
-            console.log("res.cookie", res.cookie);
 			res.cookie("token", token, {
 				httpOnly: true,
 				expires: new Date(Date.now() + 24 * 3600000)
 			});
-            console.log("res.cookie", res.cookie);
 			res.send({
 				message: "Login successful",
 				token,
@@ -64,7 +61,6 @@ authRouter.post("/users/signup", async function(req,res){
 		const { password } = req.body;
 		const saltRounds = 10;
 		const hashedPassword = await bycrypt.hash(password, saltRounds);
-		console.log("Hashed password", hashedPassword);
 		if(!req.body.profilePicture) {
 			req.body.profilePicture = await getUserAvatar(req.body.firstName, req.body.lastName);
 		}
