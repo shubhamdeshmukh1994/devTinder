@@ -7,6 +7,7 @@ const User = require("../models/user");
 const { validateSingUpData } = require("../utils/validation");
 const { errorHandler } = require("../middleware/error");
 const { getUserAvatar } = require("../utils/helper");
+const redisClient = require("../config/redisClient");
 
 // app.use(); router.use() this both are same
 //The ExpressJSon() middleware is applied to parse incoming JSON request bodies, making the data accessible via req.body.
@@ -32,7 +33,13 @@ authRouter.post("/users/login", async function(req,res){
 				httpOnly: true,
 				expires: new Date(Date.now() + 24 * 3600000)
 			});
-			res.send({
+			const cacheKey = `user:${user._id}`;
+			const cachedData = await redisClient.get(cacheKey);
+			if (cachedData) {
+				return res.send(JSON.parse(cachedData));
+
+			}
+			const userData = {
 				message: "Login successful",
 				token,
 				firstName: user?.firstName,
@@ -45,7 +52,14 @@ authRouter.post("/users/login", async function(req,res){
 				about: user?.about,
 				age: user?.age,
 				gender:user?.gender
-			});	
+			}
+
+			await redisClient.set(
+				cacheKey,
+				JSON.stringify(userData),
+				{ EX: 3600 }
+			);
+			res.send(userData);	
 		} else {
 			res.status(401).send("Invalid credentials");
 		}
@@ -94,12 +108,14 @@ authRouter.post("/users/signup", async function(req,res){
 	
 });
 
-authRouter.post("/users/logout", async function(req,res){
+authRouter.post("/users/logout/:id", async function(req,res){
     try {
+		let userId = req.params.id;
         res.clearCookie("token", null, {
                 expires: new Date(Date.now())
             }
-        );   
+        );
+		await redisClient.del(`user:${userId}`);
         res.send("Logout successful");
     } catch (error) {
         console.log("Error logging out user", error);

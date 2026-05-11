@@ -6,6 +6,7 @@ const { userAuth } = require("../middleware/auth");
 const { errorHandler } = require("../middleware/error");
 const ConnectionRequest = require("../models/connectionRequest");
 const { patch } = require("./auth");
+const redisClient = require("../config/redisClient");
 
 usersRouter.use(express.json());
 usersRouter.use(errorHandler);
