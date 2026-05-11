@@ -15,6 +15,8 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 
+require("./utils/cron.cjs");
+
 const authRouter = require("./routers/auth");
 const profileRouter = require("./routers/profile");
 const usersRouter = require("./routers/users");
@@ -27,6 +29,8 @@ app.use("/",profileRouter);
 app.use("/",usersRouter);
 app.use("/",connectionRouter);
 app.use("/", chatRouter);
+
+
 
 
 const server = http.createServer(app);
