@@ -5,6 +5,8 @@ let connectDb = require("./config/database");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const http = require("http");
+const rateLimiter = require('./middleware/rateLimiter');
+
 const port = process.env.PORT || 3000;
 
 //The ExpressJSon() middleware is applied to parse incoming JSON request bodies,
@@ -14,6 +16,7 @@ app.use(cors({
 }));
 app.use(cookieParser());
 app.use(express.json());
+app.use(rateLimiter);
 
 require("./utils/cron.cjs");
 
