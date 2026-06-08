@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const http = require("http");
 const rateLimiter = require('./middleware/rateLimiter');
+const { connectProducer } = require("./kafka/producer");
 
 const port = process.env.PORT || 3000;
 
@@ -46,5 +47,14 @@ connectDb().then(() => {
 	});
 }).catch(err => console.log(err));
 
+
+const startServer = async () => {
+    await connectProducer();
+    app.listen(7777, () => {
+        console.log("Kafka Server Running");
+    });
+};
+
+startServer();
 // kill -9 $(lsof -t -i:3000)
 // killall node
